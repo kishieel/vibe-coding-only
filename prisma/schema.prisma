@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Stub {
+  id Int @id @default(autoincrement())
+}
+
+model Document {
+  id             Int                 @id @default(autoincrement())
+  fileName       String
+  fileSize       Int
+  mimeType       String
+  s3Key          String
+  createdAt      DateTime            @default(now())
+  summary        String?
+  keywords       String[]            @default([])
+  topics         String[]            @default([])
+  sentiment      String?
+  language       String?
+  classification String?
+  confidence     Float?
+  embeddings     Json?
+  extraction     DocumentExtraction?
+}
+
+model DocumentExtraction {
+  id         Int      @id @default(autoincrement())
+  documentId Int      @unique
+  tables     Json?
+  forms      Json?
+  metadata   Json?
+  document   Document @relation(fields: [documentId], references: [id])
+}
