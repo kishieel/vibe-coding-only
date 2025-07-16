@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: 'bitnami/postgresql:17.0.0'
+    restart: 'always'
+    environment:
+      POSTGRESQL_USERNAME: '${POSTGRES_USERNAME:-postgres}'
+      POSTGRESQL_PASSWORD: '${POSTGRES_PASSWORD:-password}'
+      POSTGRESQL_DATABASE: '${POSTGRES_DATABASE:-app}'
+    ports:
+      - '11000:5432'
+    volumes:
+      - 'postgres_data:/bitnami/postgresql'
+      - './scripts/wait-for-postgres.sh:/wait-for-postgres.sh'
+    networks:
+      - 'default'
+
+  backend:
+    image: 'node:22'
+    restart: 'always'
+    workdir: '/app'
+    command: 'yarn start:dev'
+    environment:
+      DATABASE_URL: 'postgresql://${POSTGRES_USERNAME:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DATABASE:-app}'
+    ports:
+      - '10000:3000'
+    volumes:
+      - './:/app'
+    depends_on:
+      - postgres
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
