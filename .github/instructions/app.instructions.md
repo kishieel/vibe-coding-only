@@ -105,10 +105,16 @@ There is no LLM-prepared documentation provided for NestJS.
 When documentation is needed:
 
 - Perform an internet search specifically using the NestJS official domain or GitHub page as a filter:
-  - https://docs.nestjs.com
-  - https://github.com/nestjs/nest
+  - [https://docs.nestjs.com](https://docs.nestjs.com)
+  - [https://github.com/nestjs/nest](https://github.com/nestjs/nest)
 - Avoid using outdated or unofficial blogs unless there’s no other source available.
 
 > Note:
 > Whenever possible, prioritize structured content over open-ended search queries.
 > Only resort to web crawling for NestJS when no structured source is provided.
+
+## GraphQL
+
+For GraphQL server we use Yoga. For documentation, refer to the official Yoga GraphQL documentation: [https://the-guild.dev/graphql/yoga-server/docs](https://the-guild.dev/graphql/yoga-server/docs)
+
+And for documentation how to use it with NestJS please refer to: [https://the-guild.dev/graphql/yoga-server/docs/integrations/integration-with-nestjs](https://the-guild.dev/graphql/yoga-server/docs/integrations/integration-with-nestjs)

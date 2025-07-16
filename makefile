@@ -1,7 +1,7 @@
-.PHONY: bootstrap environment wait-for-services install migrate truncate prestart start stop watch prune
-.DEFAULT_GOAL: watch
+.PHONY: bootstrap environment wait-for-services install migrate truncate prestart start stop prune
+.DEFAULT_GOAL: start
 
-bootstrap: environment install prestart wait-for-services migrate watch
+bootstrap: environment install prestart wait-for-services migrate start
 
 environment: 
 	@test -f .env || cp .env.example .env
@@ -13,10 +13,10 @@ install:
 	@yarn install
 
 migrate:
-	@docker compose run --rm backend yarn migrate
+	@docker compose run --rm backend yarn migrate:deploy
 
 truncate:
-	@docker compose run --rm backend yarn truncate
+	@docker compose run --rm backend yarn migrate:truncate
 
 prestart:
 	@docker compose up -d postgres
@@ -26,9 +26,6 @@ start:
 
 stop:
 	@docker compose down
-
-watch:
-	@docker compose watch
 
 prune:
 	@docker compose down -v

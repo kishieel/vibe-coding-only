@@ -1,0 +1,89 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AnalysisInput {
+  documentId: Int!
+}
+
+type ClassificationOutput {
+  category: String!
+  confidence: Float!
+}
+
+input DocumentCreateInput {
+  file: File!
+}
+
+input DocumentInput {
+  id: Int!
+}
+
+type DocumentObject {
+  classification: String
+  confidence: String
+  fileName: String!
+  fileSize: Int!
+  id: Int!
+  keywords: [String!]
+  language: String
+  mimeType: String!
+  s3Key: String!
+  sentiment: String
+  signedUrl: String!
+  summary: String
+  topics: [String!]
+}
+
+type ExtractionOutput {
+  forms: String
+  metadata: String
+  tables: String
+}
+
+scalar File
+
+type KeywordsOutput {
+  keywords: [String!]!
+}
+
+type LanguageOutput {
+  language: String!
+}
+
+type Mutation {
+  analyzeSentiment(input: AnalysisInput!): SentimentOutput!
+  classify(input: AnalysisInput!): ClassificationOutput!
+  createDocument(input: DocumentCreateInput!): DocumentObject!
+  detectLanguage(input: AnalysisInput!): LanguageOutput!
+  extractKeywords(input: AnalysisInput!): KeywordsOutput!
+  extractStructured(input: AnalysisInput!): ExtractionOutput!
+  extractTopics(input: AnalysisInput!): TopicsOutput!
+  summarize(input: AnalysisInput!): SummaryOutput!
+  vectorSearch(query: String!): VectorSearchOutput!
+}
+
+type Query {
+  document(input: DocumentInput!): DocumentObject
+}
+
+type SentimentOutput {
+  sentiment: String!
+}
+
+type SummaryOutput {
+  summary: String!
+}
+
+type TopicsOutput {
+  topics: [String!]!
+}
+
+type VectorSearchOutput {
+  results: [VectorSearchResult!]!
+}
+
+type VectorSearchResult {
+  documentId: Int!
+  score: Float!
+}
