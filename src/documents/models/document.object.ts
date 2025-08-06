@@ -1,4 +1,9 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
+import { DocumentStatus } from '@prisma/client';
+
+registerEnumType(DocumentStatus, {
+  name: 'DocumentStatus',
+});
 
 @ObjectType()
 export class DocumentObject {
@@ -16,6 +21,9 @@ export class DocumentObject {
 
   @Field(() => String)
   s3Key: string;
+
+  @Field(() => DocumentStatus)
+  status: DocumentStatus;
 
   @Field(() => String, { nullable: true })
   summary?: string | null;

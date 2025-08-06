@@ -37,7 +37,6 @@ export class DocumentsResolver {
 
   @ResolveField(() => String)
   async signedUrl(@Parent() document: DocumentObject): Promise<string> {
-    // Generate signed URL for S3 file
     return this.s3Service.getSignedUrl(document.s3Key);
   }
 }

@@ -17,12 +17,19 @@ model Stub {
   id Int @id @default(autoincrement())
 }
 
+enum DocumentStatus {
+  PENDING
+  PARSING
+  READY
+}
+
 model Document {
   id             Int                 @id @default(autoincrement())
   fileName       String
   fileSize       Int
   mimeType       String
   s3Key          String
+  status         DocumentStatus      @default(PENDING)
   createdAt      DateTime            @default(now())
   summary        String?
   keywords       String[]            @default([])

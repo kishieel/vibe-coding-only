@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../modules/prisma/prisma.service';
 import { S3Service } from '../modules/s3/s3.service';
 import { Document } from '@prisma/client';
 import { File } from 'node:buffer';
-import { Readable } from 'node:stream';
 
 @Injectable()
 export class DocumentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly s3: S3Service,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async createDocument(file: File): Promise<Document> {
@@ -32,7 +33,7 @@ export class DocumentsService {
 
     await this.s3.uploadFile(s3Key, buffer, file.type, file.size);
 
-    return this.prisma.document.create({
+    const document = await this.prisma.document.create({
       data: {
         fileName: file.name,
         fileSize: file.size,
@@ -40,6 +41,11 @@ export class DocumentsService {
         s3Key,
       },
     });
+
+    // Emit event for document processing
+    this.eventEmitter.emit('document.uploaded', { documentId: document.id });
+
+    return document;
   }
 
   async getDocument(id: number): Promise<Document | null> {

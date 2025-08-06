@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { AnalysisResolver } from './resolvers/analysis.resolver';
 import { AnalysisService } from './analysis.service';
+import { AnalysisListener } from './analysis.listener';
 
 @Module({
-  providers: [AnalysisService, AnalysisResolver],
+  providers: [AnalysisService, AnalysisListener],
 })
 export class AnalysisModule {}

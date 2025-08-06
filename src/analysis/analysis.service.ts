@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../modules/prisma/prisma.service';
-import { LangchainService } from '../modules/langchain/langchain.service';
-import { S3Service } from '../modules/s3/s3.service';
+import { LangchainService } from 'src/modules/langchain/langchain.service';
+import { S3Service } from 'src/modules/s3/s3.service';
 
 @Injectable()
 export class AnalysisService {
@@ -11,123 +11,26 @@ export class AnalysisService {
     private readonly s3: S3Service,
   ) {}
 
-  async summarize(documentId: number): Promise<string> {
-    const doc = await this.prisma.document.findUnique({
+  async process(documentId: number): Promise<void> {
+    const document = await this.prisma.document.findUniqueOrThrow({
       where: { id: documentId },
     });
-    if (!doc) throw new Error('Document not found');
-    const summary = await this.langchain.summarizeDocument(doc.fileName);
+
+    const file = await this.s3.getFile(document.s3Key);
+
+    const [language, keywords] = await Promise.all([
+      this.langchain.detectLanguage(file, document.mimeType),
+      this.langchain.detectKeywords(file, document.mimeType),
+    ]);
+
+    console.log(`Detected language for document ${documentId}: ${language}`);
+    console.log(
+      `Detected keywords for document ${documentId}: ${keywords.join(', ')}`,
+    );
+
     await this.prisma.document.update({
       where: { id: documentId },
-      data: { summary },
+      data: { status: 'READY' },
     });
-    return summary;
-  }
-
-  async extractKeywords(documentId: number): Promise<string[]> {
-    const doc = await this.prisma.document.findUnique({
-      where: { id: documentId },
-    });
-    if (!doc) throw new Error('Document not found');
-    const keywords = ['keyword1', 'keyword2'];
-    await this.prisma.document.update({
-      where: { id: documentId },
-      data: { keywords },
-    });
-    return keywords;
-  }
-
-  async extractTopics(documentId: number): Promise<string[]> {
-    const doc = await this.prisma.document.findUnique({
-      where: { id: documentId },
-    });
-    if (!doc) throw new Error('Document not found');
-    const topics = ['topic1', 'topic2'];
-    await this.prisma.document.update({
-      where: { id: documentId },
-      data: { topics },
-    });
-    return topics;
-  }
-
-  async analyzeSentiment(documentId: number): Promise<string> {
-    const doc = await this.prisma.document.findUnique({
-      where: { id: documentId },
-    });
-    if (!doc) throw new Error('Document not found');
-    const sentiment = 'neutral';
-    await this.prisma.document.update({
-      where: { id: documentId },
-      data: { sentiment },
-    });
-    return sentiment;
-  }
-
-  async detectLanguage(documentId: number): Promise<string> {
-    const doc = await this.prisma.document.findUnique({
-      where: { id: documentId },
-    });
-    if (!doc) throw new Error('Document not found');
-    const buffer = await this.s3.getFile(doc.s3Key);
-    const content = buffer.toString('utf-8');
-    const language = await this.langchain.detectLanguage(content);
-    await this.prisma.document.update({
-      where: { id: documentId },
-      data: { language },
-    });
-    return language;
-  }
-
-  async classify(
-    documentId: number,
-  ): Promise<{ category: string; confidence: number }> {
-    const doc = await this.prisma.document.findUnique({
-      where: { id: documentId },
-    });
-    if (!doc) throw new Error('Document not found');
-    const category = 'general';
-    const confidence = 0.95;
-    await this.prisma.document.update({
-      where: { id: documentId },
-      data: { classification: category, confidence },
-    });
-    return { category, confidence };
-  }
-
-  async generateEmbeddings(documentId: number): Promise<number[]> {
-    const doc = await this.prisma.document.findUnique({
-      where: { id: documentId },
-    });
-    if (!doc) throw new Error('Document not found');
-    const embeddings = await this.langchain.generateEmbeddings(doc.fileName);
-    await this.prisma.document.update({
-      where: { id: documentId },
-      data: { embeddings },
-    });
-    return embeddings;
-  }
-
-  async vectorSearch(
-    query: string,
-  ): Promise<{ documentId: number; score: number }[]> {
-    return [{ documentId: 1, score: 0.99 }];
-  }
-
-  async extractStructured(
-    documentId: number,
-  ): Promise<{ tables?: string; forms?: string; metadata?: string }> {
-    const doc = await this.prisma.document.findUnique({
-      where: { id: documentId },
-    });
-    if (!doc) throw new Error('Document not found');
-    const tables = JSON.stringify({ table: 'stub' });
-    const forms = JSON.stringify({ form: 'stub' });
-    const metadata = JSON.stringify({ meta: 'stub' });
-    await this.prisma.documentExtraction.upsert({
-      where: { documentId },
-      update: { tables, forms, metadata },
-      create: { documentId, tables, forms, metadata },
-    });
-    return { tables, forms, metadata };
   }
 }
